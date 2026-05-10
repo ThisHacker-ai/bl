@@ -1,0 +1,51 @@
+#Allow users to create multiple transactions and display them in an organised format.
+!pip install pycryptodome
+
+import datetime, collections
+from Crypto.PublicKey import RSA
+from Crypto.Hash import SHA256
+from Crypto.Signature import pkcs1_15
+
+class Client:
+    def __init__(self):
+        key = RSA.generate(1024)
+        self._private = key
+        self._public  = key.publickey()
+
+    @property
+    def identity(self):
+        return self._public.export_key('DER').hex()
+
+class Transaction:
+    def __init__(self, sender, recipient, value):
+        self.sender    = sender      # Client object or 'Genesis'
+        self.recipient = recipient
+        self.value     = value
+        self.time      = datetime.datetime.now()
+
+    def to_dict(self):
+        sender_id = 'Genesis' if self.sender == 'Genesis' else self.sender.identity
+        return collections.OrderedDict({
+            'sender'   : sender_id,
+            'recipient': self.recipient,
+            'value'    : self.value,
+            'time'     : str(self.time)
+        })
+
+    def sign(self):
+        h = SHA256.new(str(self.to_dict()).encode('ascii'))
+        return pkcs1_15.new(self.sender._private).sign(h).hex()
+
+def display(tx):
+    d = tx.to_dict()
+    print('Sender   :', d['sender'][:20], '...')
+    print('Recipient:', d['recipient'][:20], '...')
+    print('Value    :', d['value'])
+    print('Time     :', d['time'])
+    print('-' * 40)
+
+# ── Demo ────────────────────────────────────────
+Alice = Client(); Bob = Client()
+t1 = Transaction(Alice, Bob.identity, 10.0)
+t2 = Transaction(Bob,   Alice.identity, 3.5)
+for t in [t1, t2]: display(t)
