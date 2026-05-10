@@ -1,0 +1,68 @@
+#Demonstrate running a blockchain node on the local machine. 
+#This practical uses the same Python RPC script as 2-B, connected to the local Bitcoin Core regtest node. The key steps are:
+
+
+To interact with a local Bitcoin Core node in regtest mode using Python, start bitcoind with the specified configuration, 
+install the requests library (pip install requests), a
+nd use HTTP POST requests to send JSON-RPC commands to http://127.0.0.1:18443.1. 
+Configure and Start Bitcoin CoreEnsure your bitcoin.conf file (usually in ~/.bitcoin/ or %APPDATA%\Bitcoin\) 
+contains:
+
+ini
+
+regtest=1
+server=1
+rpcuser=admin
+rpcpassword=admin123
+rpcallowip=127.0.0.1
+# Note: In newer versions, the default RPC port for regtest is 18443
+rpcport=18443 
+
+
+Use code with caution.
+
+Start your node:
+bashbitcoind -regtest -daemon
+
+Use code with caution.2. Python Script ExampleUse the requests library to make RPC calls.
+#python
+
+import requests
+import json
+
+# RPC connection details
+url = "http://127.0.0.1:18443"
+user = "admin"
+password = "admin123"
+
+def bitcoin_rpc(method, params=[]):
+    payload = {
+        "jsonrpc": "1.0",
+        "id": "curltext",
+        "method": method,
+        "params": params
+    }
+    response = requests.post(
+        url,
+        data=json.dumps(payload),
+        auth=(user, password)
+    )
+    return response.json()
+
+# --- Example Interactions ---
+
+# 1. Get Blockchain Info
+print("Blockchain Info:", bitcoin_rpc("getblockchaininfo"))
+
+# 2. Generate new blocks (required to mine coins in regtest)
+# Generates 101 blocks to make coinbase reward spendable
+print("Mining blocks:", bitcoin_rpc("generatetoaddress", [101, "bcrt1q...your_address..."]))
+
+# 3. Get Wallet Balance
+print("Balance:", bitcoin_rpc("getbalance"))
+Use code with caution.
+3. Common Regtest Commands
+Generate blocks: bitcoin-cli -regtest generatetoaddress 1 <address>
+Get new address: bitcoin-cli -regtest getnewaddress
+Check balance: bitcoin-cli -regtest getbalance
+If you receive connection errors, confirm the rpcport matches the one specified in bitcoin.conf (18443 or 8332).
