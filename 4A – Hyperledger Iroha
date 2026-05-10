@@ -1,0 +1,88 @@
+#Install Hyperledger Iroha on Ubuntu VM using Docker and perform transactions and queries.
+
+Super Short Flow
+Install VM → Install Ubuntu → Install Docker → Create Volume → Clone Iroha → Run Iroha → Open CLI → Create Domain → Create Asset → Add Quantity → Query Asset
+PART A – Create Ubuntu VM
+Step 1: Install Requirements
+Install VMware Player/Workstation
+Download Ubuntu ISO
+
+Step 2: Create Virtual Machine
+
+In VMware:
+
+File → New Virtual Machine
+Choose:
+Typical
+
+Step 3: Select Ubuntu ISO
+Choose:
+Installer disc image file (iso)
+Browse Ubuntu ISO
+Click Next
+
+Step 4: Configure VM
+
+Set:
+
+Disk Size = 25 GB
+RAM = 4 GB
+Store as single file
+
+Then click Finish.
+
+Step 5: Install Ubuntu
+Start VM
+Follow Ubuntu installation steps
+
+Ubuntu gets installed inside VMware.
+
+PART B – Install Docker
+Step 6: Open Ubuntu Terminal
+
+Run:
+
+sudo apt-get install curl
+Step 7: Install Docker
+
+Run:
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get update
+apt-cache policy docker-ce
+sudo apt-get install -y docker-ce
+
+PART C – Setup Hyperledger Iroha
+Step 8: Create Docker Volume
+sudo docker volume create blockstore
+
+Purpose:
+
+Stores blockchain data permanently
+
+Step 9: Install Git & Clone Iroha
+sudo apt-get install git
+git clone -b develop https://github.com/hyperledger/iroha --depth=1
+
+Step 10: Run Iroha Docker Container
+sudo docker run -it --name iroha \
+-p 50051:50051 \
+-v $(pwd)/iroha/example:/opt/iroha_data \
+-v blockstore:/tmp/block_store \
+--network=srcmake-iroha-network \
+--entrypoint=/bin/bash \
+hyperledger/iroha:x86_64-develop-latest
+
+Step 11: Start Iroha
+irohad --config config.docker --genesis_block genesis.block --keypair_name node0
+
+Purpose:
+
+Starts blockchain node
+
+Step 12: Open Another Terminal & Attach Container
+sudo docker exec -it iroha /bin/bash
+
+Step 13: Open Iroha CLI
+iroha-cli --account_name admin@test
