@@ -1,0 +1,40 @@
+#Implement a function to add new blocks to the miner and dump the blockchain.
+
+import hashlib, datetime
+
+class Block:
+    def __init__(self, index, data, prev_hash='0'*64):
+        self.index      = index
+        self.data       = data
+        self.prev_hash  = prev_hash
+        self.timestamp  = str(datetime.datetime.now())
+        self.hash       = self.compute_hash()
+
+    def compute_hash(self):
+        content = f'{self.index}{self.data}{self.prev_hash}{self.timestamp}'
+        return hashlib.sha256(content.encode()).hexdigest()
+
+class Blockchain:
+    def __init__(self):
+        genesis = Block(0, 'Genesis Block')
+        self.chain = [genesis]
+
+    def add_block(self, data):
+        prev = self.chain[-1]
+        new  = Block(len(self.chain), data, prev.hash)
+        self.chain.append(new)
+
+    def dump(self):
+        print(f'Chain length: {len(self.chain)}')
+        for b in self.chain:
+            print(f'  Block #{b.index}')
+            print(f'    Data     : {b.data}')
+            print(f'    Prev Hash: {b.prev_hash[:20]}...')
+            print(f'    Hash     : {b.hash[:20]}...')
+            print(f'    Time     : {b.timestamp}')
+
+# ── Demo ────────────────────────────────────────
+bc = Blockchain()
+bc.add_block('Alice sends Bob 10 BTC')
+bc.add_block('Bob sends Carol 5 BTC')
+bc.dump()
