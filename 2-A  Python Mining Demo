@@ -1,0 +1,18 @@
+#Write a Python program to demonstrate mining (Proof-of-Work).
+
+import hashlib
+
+def sha256(msg: str) -> str:
+    return hashlib.sha256(msg.encode()).hexdigest()
+
+def mine(message: str, difficulty: int = 2) -> str:
+    prefix = '0' * difficulty
+    for nonce in range(1_000_000):
+        digest = sha256(message + str(nonce))
+        if digest.startswith(prefix):
+            print(f'Mined after {nonce+1} iterations | nonce={nonce}')
+            print(f'Hash: {digest}')
+            return digest
+    print('Could not mine within limit')
+
+mine('Hello Blockchain', difficulty=3)
