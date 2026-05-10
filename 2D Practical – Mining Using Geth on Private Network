@@ -1,0 +1,112 @@
+# Create a private Ethereum blockchain, create account, start mining, and check Ether balance.
+
+Short Memorization Flow
+Install → Create Folder → Create Genesis → Initialize → Create Account → Start Network → Attach Console → Mine & Check Balance
+Step-by-Step Commands
+Step 1: Install Geth
+Download and install Geth  Geth file download (https://geth.ethereum.org/downloads/)
+Add Geth path in Environment Variables C:\Program Files\Geth
+Open CMD as Administratorgeth attach \\.\pipe\geth.ipc
+
+Step 2: Create Data Folder
+
+Create a folder:
+mychaindata
+Run - geth init genesis.json --datadir mychaindata
+
+
+
+Step 3: Create genesis.json
+
+Inside mychaindata, create a file named:
+
+genesis.json
+
+Paste:
+
+{
+  "config": {
+    "chainId": 1234,
+    "homesteadBlock": 0,
+    "eip150Block": 0,
+    "eip155Block": 0,
+    "eip158Block": 0,
+    "byzantiumBlock": 0,
+    "constantinopleBlock": 0,
+    "petersburgBlock": 0,
+    "istanbulBlock": 0,
+    "berlinBlock": 0,
+    "londonBlock": 0,
+    "terminalTotalDifficulty": 0
+  },
+  "difficulty": "1",
+  "gasLimit": "8000000",
+  "alloc": {}
+}
+
+Step 4: Initialize Blockchain
+
+Run:
+
+geth --datadir mychaindata init genesis.json
+
+Purpose:
+
+Creates Genesis Block
+Initializes private blockchain
+
+Step 5: Create Ethereum Account
+
+Run:
+
+geth account new --datadir mychaindata
+Enter password
+Account address gets generated
+
+Step 6: Start Private Network
+
+Run:
+geth --datadir mychaindata --networkid 1234 --http --http.api "eth,net,web3,miner" --authrpc.jwtsecret mychaindata/geth/jwtsecret --mine --allow-insecure-unlock console
+
+load it:
+geth --datadir mychaindata --networkid 1234 --http --http.api eth,net,web3,miner,admin --allow-insecure-unlock console
+
+Purpose:
+
+Starts private Ethereum blockchain
+
+Step 7: Open Geth JS Console
+
+Open new CMD and run:
+
+geth attach \\.\pipe\geth.ipc
+
+Step 8: Check Accounts
+
+Inside console:
+
+eth.accounts
+
+Shows Ethereum account address.
+
+Step 9: Start Mining
+
+Run:
+
+miner.start()
+
+Purpose:
+
+Starts mining Ether
+Creates blocks
+
+Stop mining:
+
+miner.stop()
+Step 10: Check Ether Balance
+
+Run:
+
+web3.fromWei(eth.getBalance(eth.accounts[0]), "ether")
+
+Shows mined Ether balance.
