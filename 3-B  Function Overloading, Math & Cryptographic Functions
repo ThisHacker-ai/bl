@@ -1,0 +1,28 @@
+#Demonstrate function overloading, addmod/mulmod, and keccak256.
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract MathCrypto {
+
+    // ── Function Overloading ──────────────────────
+    function getSum(uint a, uint b) public pure returns (uint) {
+        return a + b;
+    }
+    function getSum(uint a, uint b, uint c) public pure returns (uint) {
+        return a + b + c;
+    }
+
+    // ── Mathematical Built-ins ────────────────────
+    function callAddMod() public pure returns (uint) {
+        return addmod(4, 5, 3);   // (4+5) % 3 = 0
+    }
+    function callMulMod() public pure returns (uint) {
+        return mulmod(4, 5, 3);   // (4*5) % 3 = 2
+    }
+
+    // ── Cryptographic ─────────────────────────────
+    function hashIt(string memory data) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(data));
+    }
+}
