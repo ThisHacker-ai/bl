@@ -1,0 +1,33 @@
+#Create a Transaction class with sender, receiver and amount attributes, and implement a transfer method.
+
+class Account:
+    def __init__(self, name, balance):
+        self.name    = name
+        self.balance = balance
+
+    def __str__(self):
+        return f'{self.name}: ${self.balance:.2f}'
+
+class Transaction:
+    def __init__(self, sender: Account, receiver: Account, amount: float):
+        self.sender   = sender
+        self.receiver = receiver
+        self.amount   = amount
+
+    def transfer(self):
+        if self.sender.balance < self.amount:
+            print('Insufficient funds!')
+            return False
+        self.sender.balance   -= self.amount
+        self.receiver.balance += self.amount
+        print(f'Transferred ${self.amount:.2f} from {self.sender.name} to {self.receiver.name}')
+        return True
+
+# ── Demo ────────────────────────────────────────
+alice = Account('Alice', 500.0)
+bob   = Account('Bob',    50.0)
+print('Before:', alice, '|', bob)
+
+tx = Transaction(alice, bob, 150.0)
+tx.transfer()
+print('After :', alice, '|', bob)
