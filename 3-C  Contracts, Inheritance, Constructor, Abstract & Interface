@@ -1,0 +1,36 @@
+#Demonstrate contracts, inheritance, constructors, abstract contracts, and interfaces.
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+// Interface
+interface ICalculator {
+    function calculate(uint a, uint b) external pure returns (uint);
+}
+
+// Abstract contract
+abstract contract Base {
+    string public name;
+    constructor(string memory _name) { name = _name; }
+    function greet() public view virtual returns (string memory);
+}
+
+// Concrete contract – inherits Base, implements ICalculator
+contract MyContract is Base, ICalculator {
+
+    uint public result;
+
+    constructor() Base('MyContract') {}
+
+    function greet() public view override returns (string memory) {
+        return string(abi.encodePacked('Hello from ', name));
+    }
+
+    function calculate(uint a, uint b) public pure override returns (uint) {
+        return a + b;
+    }
+
+    function storeResult(uint a, uint b) public {
+        result = calculate(a, b);
+    }
+}
