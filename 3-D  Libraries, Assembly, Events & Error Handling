@@ -1,0 +1,50 @@
+# Demonstrate libraries, inline assembly, events, and error handling (require/revert/custom errors).
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+// Library
+library MathLib {
+    function sumArray(uint[] memory data) internal pure returns (uint total) {
+        for (uint i = 0; i < data.length; i++) {
+            total += data[i];
+        }
+    }
+}
+
+// Custom error (gas-efficient, ^0.8.4+)
+error InsufficientFunds(uint requested, uint available);
+
+contract Demo {
+    using MathLib for uint[];
+
+    // Event
+    event Deposited(address indexed who, uint amount);
+
+    mapping(address => uint) public balances;
+
+    // Inline assembly – adds two numbers
+    function asmAdd(uint a, uint b) public pure returns (uint result) {
+        assembly { result := add(a, b) }
+    }
+
+    // Library usage
+    function sumArray(uint[] calldata arr) external pure returns (uint) {
+        return arr.sumArray();
+    }
+
+    // Error handling with require
+    function deposit() public payable {
+        require(msg.value > 0, 'Must send ETH');
+        balances[msg.sender] += msg.value;
+        emit Deposited(msg.sender, msg.value);
+    }
+
+    // Custom error with revert
+    function withdraw(uint amount) public {
+        if (balances[msg.sender] < amount)
+            revert InsufficientFunds(amount, balances[msg.sender]);
+        balances[msg.sender] -= amount;
+        payable(msg.sender).transfer(amount);
+    }
+}
