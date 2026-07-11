@@ -1,0 +1,221 @@
+Here are the clean step-by-step instructions for those four practicals, pulled from the screenshots in your file:
+
+## Practical 2-B: Bitcoin Core API
+
+1. Download Bitcoin Core from https://bitcoin.org/en/bitcoin-core/ and install it.
+2. Open Bitcoin Core → File → Options → Main tab. Check **Prune block storage** and **Enable RPC server**. Click "Open Configuration File."
+3. A popup appears — click **Continue**.
+4. In the opened `bitcoin.conf` file (Notepad), add:
+   ```
+   server=1
+   rpcuser=admin
+   rpcpassword=admin123
+   rpcallowip=127.0.0.1
+   regtest=1
+   ```
+   Save and close.
+5. Navigate to `C:\Program Files\Bitcoin\daemon`, open Command Prompt there, and turn off your firewall temporarily.
+6. Run: `bitcoind -regtest`
+7. In a new terminal (same folder), run these commands one by one:
+   ```
+   bitcoin-cli -regtest -rpcuser=admin -rpcpassword=admin123 getblockchaininfo
+   bitcoin-cli -regtest -rpcuser=admin -rpcpassword=admin123 createwallet "student_wallet"
+   bitcoin-cli -regtest -rpcuser=admin -rpcpassword=admin123 getnewaddress
+   bitcoin-cli -regtest -rpcuser=admin -rpcpassword=admin123 generatetoaddress 101 <address>
+   bitcoin-cli -regtest -rpcuser=admin -rpcpassword=admin123 getbalance
+   ```
+8. Install the Python library: `pip install requests`
+9. Write a Python script using `requests` to call the RPC endpoint (`http://127.0.0.1:18443/`) with basic auth, and call methods like `getblockchaininfo`, `createwallet`, `getnewaddress`, `getbalance`, `listtransactions`.
+
+## Practical 2-D: Mining with Geth (Private Network)
+
+1. **Prerequisites:** Install Python + `pip install web3`; download Geth v1.15.7 from geth.ethereum.org/downloads; add Geth to system PATH; run CMD as Administrator.
+2. Run the Geth installer → select components (Geth, Development tools) → Next → Install.
+3. Add `C:\Program Files\Geth` to your system PATH via Environment Variables.
+4. Create an Ethereum account:
+   ```
+   geth account new --datadir mychaindata
+   ```
+   Set and remember a password.
+5. Create a `mychaindata` folder and inside it a `genesis.json` file:
+   ```json
+   {
+     "config": {
+       "chainId": 1234,
+       "homesteadBlock": 0,
+       "eip150Block": 0,
+       "eip155Block": 0,
+       "eip158Block": 0,
+       "byzantiumBlock": 0,
+       "constantinopleBlock": 0,
+       "petersburgBlock": 0,
+       "istanbulBlock": 0,
+       "berlinBlock": 0,
+       "londonBlock": 0,
+       "terminalTotalDifficulty": 0
+     },
+     "difficulty": "1",
+     "gasLimit": "8000000",
+     "alloc": {}
+   }
+   ```
+6. Initialize the chain:
+   ```
+   geth --datadir mychaindata init genesis.json
+   ```
+7. Start the private blockchain:
+   ```
+   geth --datadir mychaindata --networkid 1234 --http --http.api eth,net,web3,miner,admin --allow-insecure-unlock console
+   ```
+8. In a new terminal, attach to the running node:
+   ```
+   geth attach \\.\pipe\geth.ipc
+   ```
+9. Inside the Geth JS console, check accounts and balance:
+   ```
+   eth.accounts
+   web3.fromWei(eth.getBalance(eth.accounts[0]), "ether")
+   ```
+
+## Practical 3-E: DApp with Angular + Truffle + Ganache
+
+1. Install Node.js from the official website (allow Chocolatey install if prompted).
+2. Install Angular CLI:
+   ```
+   npm install -g @angular/cli
+   ```
+3. Install Truffle (run CMD as Administrator):
+   ```
+   npm install -g truffle
+   ```
+4. Install Ganache CLI:
+   ```
+   npm install -g ganache-cli
+   ```
+5. Create a project folder, navigate into it, and run:
+   ```
+   truffle init
+   ```
+   This creates `contracts/`, `migrations/`, `test/`, and `truffle-config.js`.
+6. Write your smart contract in `contracts/MessageBoard.sol`:
+   ```solidity
+   // SPDX-License-Identifier: MIT
+   pragma solidity ^0.8.0;
+
+   contract MessageBoard {
+       string public message;
+       function setMessage(string memory newMessage) public {
+           message = newMessage;
+       }
+       function getMessage() public view returns (string memory) {
+           return message;
+       }
+   }
+   ```
+7. Write a migration file `migrations/2_deploy_messageboard.js`:
+   ```javascript
+   const MessageBoard = artifacts.require("MessageBoard");
+   module.exports = function (deployer) {
+     deployer.deploy(MessageBoard);
+   };
+   ```
+8. Edit `truffle-config.js` to set the network:
+   ```javascript
+   module.exports = {
+     networks: {
+       development: {
+         host: "127.0.0.1",
+         port: 8545,
+         network_id: "*"
+       },
+     },
+     compilers: {
+       solc: {
+         version: "0.8.0"
+       }
+     }
+   };
+   ```
+9. Start Ganache CLI in a terminal (inside project folder): `ganache-cli`
+10. In another terminal, compile and deploy:
+    ```
+    truffle compile
+    truffle migrate
+    ```
+    Note the deployed **contract address** from the output.
+11. Copy the ABI JSON file from `build/contracts/MessageBoard.json` into a new frontend folder (e.g. `angularjs-dapp`).
+12. Create `angularjs-dapp/index.html` with AngularJS + Web3.js, referencing the ABI file and pasting in your contract address (see your file for full HTML/JS).
+13. In the frontend folder, run: `npx serve .`
+14. Install the **MetaMask** browser extension, set it up, and add a custom network:
+    - Network name: Ganache Local
+    - RPC URL: `http://127.0.0.1:8545`
+    - Chain ID: `1337`
+15. Import a test account into MetaMask using one of the private keys shown in the Ganache CLI output (gives you 100 fake ETH).
+16. Open `http://localhost:3000` in the browser, submit a message — MetaMask will prompt a transaction (small network fee in fake ETH) — confirm it, and the message will appear on the page.
+
+## Practical 4-A: Hyperledger Iroha (via Ubuntu VM)
+
+1. Download and install **VMware Workstation Player**.
+2. Download **Ubuntu Desktop ISO** from ubuntu.com/download/desktop.
+3. In VMware: File → New Virtual Machine → Typical → Next.
+4. Choose "Installer disc image file (ISO)" → Browse to your Ubuntu ISO → Next.
+5. Enter a VM name, choose storage location, set disk size (≥25 GB), select "Store virtual disk as a single file" → Next.
+6. Set memory to 4 GB → Finish, then let Ubuntu install and boot.
+7. Once Ubuntu is running, open a terminal and install Docker:
+   ```
+   sudo apt-get install curl
+   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+   sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+   sudo apt-get update
+   apt-cache policy docker-ce
+   sudo apt-get install -y docker-ce
+   ```
+8. Create a Docker network:
+   ```
+   sudo docker network create srcmake-iroha-network
+   ```
+9. Run PostgreSQL on that network:
+   ```
+   sudo docker run --name some-postgres \
+   -e POSTGRES_USER=postgres \
+   -e POSTGRES_PASSWORD=mysecretpassword \
+   -p 5432:5432 \
+   --network=srcmake-iroha-network \
+   -d postgres:9.5
+   ```
+10. Create a storage volume for blocks:
+    ```
+    sudo docker volume create blockstore
+    ```
+11. Install git and clone Iroha:
+    ```
+    sudo apt-get install git
+    git clone -b develop https://github.com/hyperledger/iroha --depth=1
+    ```
+12. Run the Iroha container:
+    ```
+    sudo docker run -it --name iroha \
+    -p 50051:50051 \
+    -v $(pwd)/iroha/example:/opt/iroha_data \
+    -v blockstore:/tmp/block_store \
+    --network=srcmake-iroha-network \
+    --entrypoint=/bin/bash \
+    hyperledger/iroha:x86_64-develop-latest
+    ```
+13. Inside the container, start Iroha:
+    ```
+    irohad --config config.docker --genesis_block genesis.block --keypair_name node0
+    ```
+14. Open a **new** terminal (keep the first running) and attach to the container:
+    ```
+    sudo docker exec -it iroha /bin/bash
+    ```
+15. Launch the CLI tool and log in:
+    ```
+    iroha-cli -account_name admin@test
+    ```
+16. Type `1` (New transaction) → `10` (Create Domain) → enter Domain Id `srcmakeFarm` → Default Role name `user` → type `1` to send/save as prompted, or `2` to send directly to the peer (`localhost`, port `50051`).
+17. Add an asset: type `1` (new command) → `14` (Create Asset) → name `sheep`, domain `srcmakeFarm`, precision `0` → send to peer (`localhost`, `50051`).
+18. Add quantity: type `1` → `16` (Add Asset Quantity) → account `admin@test`, asset `sheep#srcmakeFarm`, amount `50`, precision `0` → send to peer.
+19. Query the balance: type `2` (New query) → `7` (Get Account's Assets) → account `admin@test`, asset `sheep#srcmakeFarm` → send to peer (`localhost`, `50051`). Output will show the balance (e.g. 50).
+
